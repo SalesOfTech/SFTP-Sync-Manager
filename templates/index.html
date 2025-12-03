@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex flex-wrap gap-3 items-center justify-between mb-4">
+    <a class="btn btn-primary" href="/connections/add">Добавить подключение</a>
+    <div class="flex gap-2">
+        <form method="post" action="/updates/check">
+            <button class="btn btn-outline" type="submit">Check for updates</button>
+        </form>
+        {% if update_info and update_info.available %}
+        <form method="post" action="/updates/apply">
+            <button class="btn btn-accent" type="submit">Update now</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+{% if update_info %}
+<div class="alert alert-info mb-4">
+    <span class="font-semibold">Последняя проверка:</span>
+    {% if update_info.error %}
+        Ошибка {{ update_info.error }}
+    {% elif update_info.available %}
+        Доступна версия {{ update_info.latest.version }}
+    {% else %}
+        Обновлений нет
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="overflow-x-auto">
+    <table class="table table-zebra w-full">
+        <thead>
+            <tr>
+                <th>Имя</th>
+                <th>Host</th>
+                <th>Пути</th>
+                <th>Интервал</th>
+                <th>Статус</th>
+                <th>Флаги</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for conn in connections %}
+            <tr>
+                <td>{{ conn.name }}</td>
+                <td>{{ conn.host }}@{{ conn.username }}</td>
+                <td class="text-xs">{{ conn.local_path }} ⇄ {{ conn.remote_path }}</td>
+                <td>{{ conn.interval }} сек</td>
+                <td>
+                    <span class="badge badge-outline">{{ conn.status }}</span>
+                    {% if conn.last_error %}
+                        <div class="text-xs text-red-300">{{ conn.last_error }}</div>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="flex flex-col text-xs">
+                        <span>Удаления: {{ "ON" if conn.allow_delete else "OFF" }}</span>
+                        <span>Приоритет локальный: {{ "ON" if conn.local_priority else "OFF" }}</span>
+                    </div>
+                </td>
+                <td>
+                    <div class="flex flex-wrap gap-1">
+                        <form method="post" action="/connections/{{ conn.id }}/start">
+                            <button class="btn btn-xs btn-success" type="submit">Start</button>
+                        </form>
+                        <form method="post" action="/connections/{{ conn.id }}/stop">
+                            <button class="btn btn-xs btn-warning" type="submit">Stop</button>
+                        </form>
+                        <form method="post" action="/connections/{{ conn.id }}/sync">
+                            <button class="btn btn-xs btn-info" type="submit">Sync now</button>
+                        </form>
+                        <a class="btn btn-xs" href="/connections/{{ conn.id }}/edit">Edit</a>
+                        <a class="btn btn-xs btn-outline" href="/connections/{{ conn.id }}/logs">Logs</a>
+                        <form method="post" action="/connections/{{ conn.id }}/delete" onsubmit="return confirm('Удалить подключение?');">
+                            <button class="btn btn-xs btn-error" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7" class="text-center text-slate-400">Подключения отсутствуют</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

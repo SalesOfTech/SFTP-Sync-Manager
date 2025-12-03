@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-4">
+    <h2 class="text-xl font-semibold mb-2">Логи подключения {{ connection.name }}</h2>
+    <a class="btn btn-sm btn-outline" href="/">Назад</a>
+</div>
+<div class="overflow-x-auto">
+    <table class="table table-zebra w-full">
+        <thead>
+            <tr>
+                <th>Время</th>
+                <th>Тип</th>
+                <th>Путь</th>
+                <th>Сообщение</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for log in logs %}
+            <tr>
+                <td class="whitespace-nowrap">{{ log.timestamp }}</td>
+                <td>{{ log.type }}</td>
+                <td class="text-xs">{{ log.path }}</td>
+                <td class="text-xs">{{ log.message }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4" class="text-center text-slate-500">Пока нет записей</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

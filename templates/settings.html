@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <form method="post" action="/settings/save" class="card bg-base-200 p-6 space-y-4">
+        <h2 class="text-xl font-semibold">Глобальные настройки</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="form-control">
+                <div class="label"><span class="label-text">Порт веб-сервера</span></div>
+                <input class="input input-bordered" type="number" name="web_port" value="{{ settings.web_port }}">
+            </label>
+            <label class="form-control">
+                <div class="label"><span class="label-text">Путь к логам</span></div>
+                <input class="input input-bordered" type="text" name="log_path" value="{{ settings.log_path }}">
+            </label>
+            <label class="form-control">
+                <div class="label"><span class="label-text">Язык интерфейса</span></div>
+                <input class="input input-bordered" type="text" name="language" value="{{ settings.language }}">
+            </label>
+            <label class="form-control md:col-span-2">
+                <div class="label"><span class="label-text">Update feed URL</span></div>
+                <input class="input input-bordered" type="text" name="update_feed" value="{{ settings.update_feed }}">
+            </label>
+        </div>
+        <label class="label cursor-pointer gap-2">
+            <span class="label-text">Автозапуск синхронизаций</span>
+            <input type="checkbox" class="checkbox" name="autostart" {% if settings.autostart %}checked{% endif %}>
+        </label>
+        <button class="btn btn-primary" type="submit">Сохранить</button>
+    </form>
+</div>
+{% endblock %}

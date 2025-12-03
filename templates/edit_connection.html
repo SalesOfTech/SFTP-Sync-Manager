@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <form method="post" action="/connections/save" class="space-y-4 card bg-base-200 p-4">
+        <input type="hidden" name="id" value="{{ connection.id if connection.id }}">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="form-control">
+                <div class="label"><span class="label-text">Имя</span></div>
+                <input class="input input-bordered" type="text" name="name" required value="{{ connection.name }}">
+            </label>
+            <label class="form-control">
+                <div class="label"><span class="label-text">Хост</span></div>
+                <input class="input input-bordered" type="text" name="host" required value="{{ connection.host }}">
+            </label>
+            <label class="form-control">
+                <div class="label"><span class="label-text">Порт</span></div>
+                <input class="input input-bordered" type="number" name="port" value="{{ connection.port or 22 }}">
+            </label>
+            <label class="form-control">
+                <div class="label"><span class="label-text">Пользователь</span></div>
+                <input class="input input-bordered" type="text" name="username" required value="{{ connection.username }}">
+            </label>
+            <label class="form-control">
+                <div class="label"><span class="label-text">Тип аутентификации</span></div>
+                <select name="auth_type" class="select select-bordered">
+                    <option value="password" {% if connection.auth_type == "password" %}selected{% endif %}>Пароль</option>
+                    <option value="key" {% if connection.auth_type == "key" %}selected{% endif %}>SSH ключ</option>
+                </select>
+            </label>
+            <label class="form-control">
+                <div class="label"><span class="label-text">Пароль</span></div>
+                <input class="input input-bordered" type="password" name="password" value="{{ connection.password or '' }}">
+            </label>
+            <label class="form-control md:col-span-2">
+                <div class="label"><span class="label-text">Путь к приватному ключу</span></div>
+                <input class="input input-bordered" type="text" name="private_key_path" value="{{ connection.private_key_path or '' }}">
+            </label>
+            <label class="form-control md:col-span-2">
+                <div class="label"><span class="label-text">Passphrase</span></div>
+                <input class="input input-bordered" type="password" name="passphrase" value="{{ connection.passphrase or '' }}">
+            </label>
+            <label class="form-control md:col-span-2">
+                <div class="label"><span class="label-text">Удалённый путь</span></div>
+                <input class="input input-bordered" type="text" name="remote_path" required value="{{ connection.remote_path }}">
+            </label>
+            <label class="form-control md:col-span-2">
+                <div class="label"><span class="label-text">Локальный путь</span></div>
+                <input class="input input-bordered" type="text" name="local_path" required value="{{ connection.local_path }}">
+            </label>
+            <label class="form-control">
+                <div class="label"><span class="label-text">Интервал (сек)</span></div>
+                <input class="input input-bordered" type="number" name="interval" value="{{ connection.interval or 30 }}">
+            </label>
+        </div>
+
+        <div class="flex gap-4 flex-wrap">
+            <label class="label cursor-pointer gap-2">
+                <span class="label-text">Включено</span>
+                <input type="checkbox" name="enabled" class="checkbox" {% if connection.enabled %}checked{% endif %}>
+            </label>
+            <label class="label cursor-pointer gap-2">
+                <span class="label-text">Разрешать удаление</span>
+                <input type="checkbox" name="allow_delete" class="checkbox" {% if connection.allow_delete %}checked{% endif %}>
+            </label>
+            <label class="label cursor-pointer gap-2">
+                <span class="label-text">Приоритет локальных файлов</span>
+                <input type="checkbox" name="local_priority" class="checkbox" {% if connection.local_priority %}checked{% endif %}>
+            </label>
+        </div>
+
+        <div class="flex gap-2">
+            <button class="btn btn-primary" type="submit">Сохранить</button>
+            <a class="btn btn-ghost" href="/">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
