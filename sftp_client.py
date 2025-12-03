@@ -65,13 +65,16 @@ class SFTPClient:
         if not self.sftp:
             raise RuntimeError("SFTP session is not connected")
         files: Dict[str, Dict[str, int]] = {}
-        base = str(PurePosixPath(remote_path)) or "/"
+        base = self._normalize_posix(remote_path)
         self._ensure_base(base)
 
-        def _walk(path: str, rel_parts: PurePosixPath) -> None:
+        def _walk(path: str, rel: PurePosixPath) -> None:
             for entry in self.sftp.listdir_attr(path):
-                entry_path = f"{path.rstrip('/')}/{entry.filename}" if path != "/" else f"/{entry.filename}"
-                rel_path = rel_parts / entry.filename
+                if path == "/":
+                    entry_path = f"/{entry.filename}"
+                else:
+                    entry_path = f"{path.rstrip('/')}/{entry.filename}"
+                rel_path = rel / entry.filename
                 if stat.S_ISDIR(entry.st_mode):
                     _walk(entry_path, rel_path)
                 else:
@@ -86,27 +89,31 @@ class SFTPClient:
     def ensure_remote_dir(self, remote_path: str) -> None:
         if not self.sftp:
             raise RuntimeError("SFTP session is not connected")
-        directory = PurePosixPath(remote_path).parent
-        parts = [] if str(directory) in (".", "") else list(directory.parts)
-        current = ""
-        for part in parts:
-            current = f"{current}/{part}" if current else part
+        parent = PurePosixPath(remote_path).parent
+        self._ensure_path(str(parent))
+
+    def _ensure_base(self, remote_path: str) -> None:
+        self._ensure_path(remote_path)
+
+    def _ensure_path(self, remote_path: str) -> None:
+        if not self.sftp:
+            raise RuntimeError("SFTP session is not connected")
+        normalized = self._normalize_posix(remote_path)
+        if normalized == "/":
+            return
+        absolute = normalized.startswith("/")
+        segments = [seg for seg in normalized.strip("/").split("/") if seg]
+        current = "/" if absolute else ""
+        for seg in segments:
+            current = f"{current.rstrip('/')}/{seg}" if current else seg
             try:
                 self.sftp.listdir(current)
             except IOError:
                 self.sftp.mkdir(current)
 
-    def _ensure_base(self, remote_path: str) -> None:
-        if not self.sftp:
-            raise RuntimeError("SFTP session is not connected")
-        segments = [p for p in PurePosixPath(remote_path).parts if p]
-        current = ""
-        for part in segments:
-            current = f"{current}/{part}" if current else part
-            try:
-                self.sftp.listdir(current)
-            except IOError:
-                self.sftp.mkdir(current)
+    def _normalize_posix(self, remote_path: str) -> str:
+        text = str(PurePosixPath(remote_path))
+        return text if text else "/"
 
     def download_file(self, remote_path: str, local_path: Path) -> None:
         if not self.sftp:

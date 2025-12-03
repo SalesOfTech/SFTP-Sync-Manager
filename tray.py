@@ -1,7 +1,8 @@
-"""pystray icon controller."""
+"""Контроллер системного трея на базе pystray."""
 
 from __future__ import annotations
 
+import os
 import threading
 import webbrowser
 from typing import Callable, Optional
@@ -11,7 +12,7 @@ import pystray
 
 
 class TrayController:
-    # RU_PLACEHOLDER_TRAY_DESCRIPTION
+    """Создаёт и управляет иконкой, пробрасывая действия в веб-интерфейс."""
 
     def __init__(self, sync_manager, updater, web_port: int, update_callback: Callable[[], None]):
         self.sync_manager = sync_manager
@@ -64,3 +65,4 @@ class TrayController:
     def _handle_exit(self) -> None:
         self.sync_manager.stop_all()
         self.stop()
+        os._exit(0)
